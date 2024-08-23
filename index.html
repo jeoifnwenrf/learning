@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Learning</title>
+    <link href="https://unpkg.com/tailwindcss@^2.0/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* macOS-like font and base styles */
+        body {
+            font-family: '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* MacOS style */
+        .macos-style, .lesson-page, .quiz-page {
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffffff, #e4e4e4);
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .macos-style:hover, .lesson-page:hover, .quiz-page:hover {
+            /* Removed hover effect */
+        }
+
+        /* Streak and XP system styles */
+        .streak, .xp {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            backdrop-filter: blur(5px);
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+        .streak:hover, .xp:hover {
+            /* Removed hover effect */
+        }
+
+        /* Level Selector */
+        .level-selector {
+            margin-top: 2rem;
+        }
+        .level-selector select {
+            appearance: none;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            color: #333;
+            transition: border-color 0.3s ease;
+        }
+        .level-selector select:focus {
+            border-color: #007aff;
+            outline: none;
+        }
+
+        /* Notification styles */
+        .notification {
+            display: none;
+            background-color: #ffeb3b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            color: #333;
+            animation: slide-down 0.5s ease-out;
+        }
+
+        /* Button styles */
+        button {
+            background-color: #007aff;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Gradient background animation */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body {
+            background: linear-gradient(135deg, #c3cfe2, #f5f7fa, #c3cfe2);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        /* Notification slide-down animation */
+        @keyframes slide-down {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Lesson page styles */
+        .lesson-page {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 800px;
+            background: #ffffff;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            text-align: center;
+        }
+        .lesson-card {
+            background: linear-gradient(135deg, #e4e4e4, #ffffff);
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem;
+            cursor: pointer;
+        }
+
+        /* Quiz page styles */
+        .quiz-page {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 800px;
+            background: #ffffff;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            text-align: center;
+        }
+        .question {
+            margin-bottom: 1rem;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            margin-top: 1rem;
+        }
+        .option {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        .option:hover {
+            background: #e0e0e0;
+        }
+        .correct {
+            background-color: #4caf50;
+            color: #ffffff;
+        }
+        .incorrect {
+            background-color: #f44336;
+            color: #ffffff;
+        }
+        .next-btn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Page -->
+    <div id="main-page" class="macos-style">
+        <h1 class="text-4xl font-bold">Welcome to Your English Learning App</h1>
+        <p class="mt-4">Start your learning journey today!</p>
+        <!-- Notification -->
+        <div id="notification" class="notification mt-4">
+            Don't forget to study today!
+        </div>
+        <!-- Streak -->
+        <div class="streak mt-4">
+            <p>Streak: <span id="streak-count">0</span> days</p>
+        </div>
+        <!-- XP System -->
+        <div class="xp mt-4">
+            <p>XP: <span id="xp-count">0</span></p>
+        </div>
+        <!-- Level Selector -->
+        <div class="level-selector">
+            <label for="level" class="block text-sm font-medium text-gray-700">Choose your level:</label>
+            <select id="level" name="level" class="mt-1 block w-full pl-3 pr-10 py-2 sm:text-sm rounded-md">
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+            </select>
+        </div>
+        <!-- Start Learning Button -->
+        <div class="mt-6">
+            <button id="start-btn">Start Learning</button>
+        </div>
+    </div>
+
+    <!-- Lesson Page -->
+    <div id="lesson-page" class="lesson-page">
+        <h2 class="text-2xl font-bold mb-4">Select a Lesson</h2>
+        <div class="lesson-card" data-lesson="1">
+            <h3 class="text-xl font-semibold">Lesson 1: Vocabulary</h3>
+            <p>Learn new words and phrases.</p>
+        </div>
+        <div class="lesson-card" data-lesson="2">
+            <h3 class="text-xl font-semibold">Lesson 2: Grammar</h3>
+            <p>Understand the rules of grammar.</p>
+        </div>
+        <div class="lesson-card" data-lesson="3">
+            <h3 class="text-xl font-semibold">Lesson 3: Speaking</h3>
+            <p>Improve your speaking skills.</p>
+        </div>
+        <button id="back-btn" class="bg-gray-500 text-white px-4 py-2 rounded mt-4">Back to Main</button>
+    </div>
+
+    <!-- Quiz Page -->
+    <div id="quiz-page" class="quiz-page">
+        <h2 class="text-2xl font-bold mb-4">Question <span id="question-number">1</span></h2>
+        <div id="question-container" class="question">
+            <!-- Question and options will be injected here by JavaScript -->
+        </div>
+        <button id="next-btn" class="next-btn">Next Question</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Rome", "Berlin"],
+                answer: "Paris"
+            },
+            {
+                question: "What is 2 + 2?",
+                options: ["3", "4", "5", "6"],
+                answer: "4"
+            },
+            {
+                question: "What is the largest planet in our solar system?",
+                options: ["Earth", "Mars", "Jupiter", "Saturn"],
+                answer: "Jupiter"
+            },
+            {
+                question: "Who wrote 'To Kill a Mockingbird'?",
+                options: ["Harper Lee", "Mark Twain", "J.K. Rowling", "Ernest Hemingway"],
+                answer: "Harper Lee"
+            },
+            {
+                question: "What is the chemical symbol for water?",
+                options: ["O2", "H2O", "CO2", "NaCl"],
+                answer: "H2O"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let xpCount = 0;
+
+        function updateUI() {
+            document.getElementById('xp-count').innerText = xpCount;
+        }
+
+        function showLessonPage() {
+            document.getElementById('main-page').style.display = 'none';
+            document.getElementById('lesson-page').style.display = 'block';
+        }
+
+        function showMainPage() {
+            document.getElementById('main-page').style.display = 'block';
+            document.getElementById('lesson-page').style.display = 'none';
+            document.getElementById('quiz-page').style.display = 'none';
+        }
+
+        function showQuizPage() {
+            document.getElementById('lesson-page').style.display = 'none';
+            document.getElementById('quiz-page').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            const questionContainer = document.getElementById('question-container');
+            questionContainer.innerHTML = `
+                <p>${question.question}</p>
+                <div class="options">
+                    ${question.options.map(option => `<div class="option" onclick="checkAnswer('${option}')">${option}</div>`).join('')}
+                </div>
+            `;
+        }
+
+        function checkAnswer(selectedOption) {
+            const correctAnswer = questions[currentQuestionIndex].answer;
+            if (selectedOption === correctAnswer) {
+                xpCount += 10; // Add 10 XP for correct answer
+                updateUI();
+                document.querySelectorAll('.option').forEach(option => {
+                    if (option.innerText === correctAnswer) {
+                        option.classList.add('correct');
+                    } else {
+                        option.classList.add('incorrect');
+                    }
+                    option.style.pointerEvents = 'none'; 
+                });
+                document.getElementById('next-btn').style.display = 'block';
+                showNotification("Correct!");
+            } else {
+                document.querySelectorAll('.option').forEach(option => {
+                    if (option.innerText === correctAnswer) {
+                        option.classList.add('correct');
+                    }
+                    option.style.pointerEvents = 'none'; 
+                });
+                showNotification("Incorrect!");
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        document.getElementById('start-btn').addEventListener('click', function() {
+            showLessonPage();
+        });
+
+        document.getElementById('back-btn').addEventListener('click', function() {
+            showMainPage();
+        });
+
+        document.querySelectorAll('.lesson-card').forEach(card => {
+            card.addEventListener('click', function() {
+                showQuizPage();
+            });
+        });
+
+        document.getElementById('next-btn').addEventListener('click', function() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+                document.getElementById('next-btn').style.display = 'none';
+            } else {
+                document.getElementById('quiz-page').innerHTML = `
+                    <h2 class="text-2xl font-bold mb-4">Congratulations!</h2>
+                    <p>You have completed all questions.</p>
+                    <button id="back-to-main" class="bg-gray-500 text-white px-4 py-2 rounded mt-4">Back to Main</button>
+                `;
+                document.getElementById('back-to-main').addEventListener('click', showMainPage);
+            }
+        });
+    </script>
+</body>
+</html>
